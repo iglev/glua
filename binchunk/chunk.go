@@ -90,12 +90,10 @@ type LocVar struct {
 	EndPC   uint32
 }
 
-/*
 // Undump ...
 func Undump(data []byte) *ProtoType {
 	reader := &reader{data}
 	reader.checkHeader()
 	reader.readByte()
-	return reader.readPorot("")
+	return reader.readProto("")
 }
-*/
