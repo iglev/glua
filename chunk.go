@@ -1,4 +1,4 @@
-package binchunk
+package golua
 
 const (
 	// LuaSignature lua binchunk header signature
@@ -40,24 +40,26 @@ const (
 	TagLongStr = 0x05
 )
 
-type binaryChunk struct {
-	header
+// BinaryChunk binary chunk
+type BinaryChunk struct {
+	BinChunkHeader
 	sizeUpvalues byte
 	mainFunc     *ProtoType
 }
 
-type header struct {
-	signature       [4]byte
-	version         byte
-	format          byte
-	luacData        [6]byte
-	cintSize        byte
-	sizetSize       byte
-	instructionSize byte
-	luaIntSize      byte
-	luaNumberSize   byte
-	luacInt         int64
-	luacNum         float64
+// BinChunkHeader binary chunk header
+type BinChunkHeader struct {
+	Signature       [4]byte
+	Version         byte
+	Format          byte
+	LuacData        [6]byte
+	CIntSize        byte
+	SizetSize       byte
+	InstructionSize byte
+	LuaIntSize      byte
+	LuaNumberSize   byte
+	LuacInt         int64
+	LuacNum         float64
 }
 
 // ProtoType prot type
@@ -92,8 +94,8 @@ type LocVar struct {
 
 // Undump ...
 func Undump(data []byte) *ProtoType {
-	reader := &reader{data}
-	reader.checkHeader()
-	reader.readByte()
-	return reader.readProto("")
+	reader := &BinChunkReader{data}
+	reader.CheckHeader()
+	reader.ReadByte()
+	return reader.ReadProto("")
 }
