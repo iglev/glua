@@ -1,8 +1,8 @@
-package golua
+package glua
 
 import (
 	"fmt"
-	"golua/binchunk"
+	"glua/binchunk"
 	"io/ioutil"
 	"testing"
 )

@@ -1,4 +1,4 @@
-package golua
+package glua
 
 import "fmt"
 
