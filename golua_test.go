@@ -2,9 +2,10 @@ package glua
 
 import (
 	"fmt"
-	"glua/binchunk"
 	"io/ioutil"
 	"testing"
+
+	"github.com/iglev/glua/binchunk"
 )
 
 func printHeader(f *binchunk.ProtoType) {
