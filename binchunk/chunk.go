@@ -26,18 +26,12 @@ const (
 )
 
 const (
-	// TagNil nil
-	TagNil = 0x00
-	// TagBoolean boolean
-	TagBoolean = 0x01
-	// TagNumber number
-	TagNumber = 0x02
-	// TagInteger integer
-	TagInteger = 0x03
-	// TagShortStr short str
-	TagShortStr = 0x04
-	// TagLongStr long str
-	TagLongStr = 0x05
+	TAG_NIL       = 0x00
+	TAG_BOOLEAN   = 0x01
+	TAG_NUMBER    = 0x03
+	TAG_INTEGER   = 0x13
+	TAG_SHORT_STR = 0x04
+	TAG_LONG_STR  = 0x14
 )
 
 // BinaryChunk binary chunk

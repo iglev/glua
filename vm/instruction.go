@@ -1,5 +1,9 @@
 package vm
 
+import (
+	"github.com/iglev/glua/api"
+)
+
 const MAXARG_Bx = 1<<18 - 1       // 262143
 const MAXARG_sBx = MAXARG_Bx >> 1 // 131071
 
@@ -60,3 +64,11 @@ func (ins Instruction) CMode() byte {
 	return opcodes[ins.Opcode()].argCMode
 }
 
+func (ins Instruction) Execute(vm api.LuaVM) {
+	action := opcodes[ins.Opcode()].action
+	if action != nil {
+		action(ins, vm)
+	} else {
+		panic(ins.OpName())
+	}
+}

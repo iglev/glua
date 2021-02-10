@@ -142,15 +142,15 @@ func (imp *Reader) ReadConstants() []interface{} {
 // ReadConstant read constant
 func (imp *Reader) ReadConstant() interface{} {
 	switch imp.ReadByte() {
-	case TagNil:
+	case TAG_NIL:
 		return nil
-	case TagBoolean:
+	case TAG_BOOLEAN:
 		return imp.ReadByte() != 0
-	case TagInteger:
+	case TAG_INTEGER:
 		return imp.ReadLuaInteger()
-	case TagNumber:
+	case TAG_NUMBER:
 		return imp.ReadLuaNumber()
-	case TagShortStr, TagLongStr:
+	case TAG_SHORT_STR, TAG_LONG_STR:
 		return imp.ReadString()
 	default:
 		panic("corrupted") // todo
