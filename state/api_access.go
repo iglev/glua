@@ -93,6 +93,15 @@ func (l *luaState) IsInteger(idx int) bool {
 	return ok
 }
 
+// IsGoFunction - lua_iscfunction
+func (l *luaState) IsGoFunction(idx int) bool {
+	val := l.stack.get(idx)
+	if c, ok := val.(*closure); ok {
+		return c.goFunc != nil
+	}
+	return false
+}
+
 // ToBoolean - lua_toboolean
 func (l *luaState) ToBoolean(idx int) bool {
 	val := l.stack.get(idx)
@@ -151,4 +160,13 @@ func (l *luaState) ToStringX(idx int) (string, bool) {
 	default:
 		return "", false
 	}
+}
+
+// ToGoFunction - lua_tocfunction
+func (l *luaState) ToGoFunction(idx int) api.GoFunction {
+	val := l.stack.get(idx)
+	if c, ok := val.(*closure); ok {
+		return c.goFunc
+	}
+	return nil
 }

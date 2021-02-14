@@ -1,8 +1,6 @@
 package vm
 
 import (
-	"fmt"
-
 	"github.com/iglev/glua/api"
 )
 
@@ -28,8 +26,6 @@ pc   op       stack:
 func forPrep(i Instruction, vm api.LuaVM) {
 	a, sBx := i.AsBx()
 	a += 1
-
-	fmt.Printf("t1=%v t2=%v t3=%v vm=%+v\n", vm.Type(a), vm.Type(a+1), vm.Type(a+2), vm)
 
 	if vm.Type(a) == api.LUA_TSTRING {
 		vm.PushNumber(vm.ToNumber(a))

@@ -1,5 +1,7 @@
 package state
 
+import "github.com/iglev/glua/api"
+
 /*
 http://www.lua.org/manual/5.3/manual.html
 */
@@ -27,4 +29,15 @@ func (l *luaState) PushNumber(n float64) {
 // PushString - lua_pushstring
 func (l *luaState) PushString(s string) {
 	l.stack.push(s)
+}
+
+// PushGoFunction - lua_pushcfunction
+func (l *luaState) PushGoFunction(f api.GoFunction) {
+	l.stack.push(newGoClosure(f))
+}
+
+// PushGlobalTable - lua_pushglobaltable
+func (l *luaState) PushGlobalTable() {
+	global := l.registry.get(api.LUA_RIDX_GLOBALS)
+	l.stack.push(global)
 }

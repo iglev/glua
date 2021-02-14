@@ -1,14 +1,25 @@
 package state
 
+import "github.com/iglev/glua/api"
+
 type luaStack struct {
+	/* virtual stack */
 	slots []luaValue
 	top   int
+	/* call info */
+	state   *luaState
+	closure *closure
+	varargs []luaValue
+	pc      int
+	/* linked list */
+	prev *luaStack
 }
 
-func newLuaStack(size int) *luaStack {
+func newLuaStack(size int, state *luaState) *luaStack {
 	return &luaStack{
 		slots: make([]luaValue, size),
 		top:   0,
+		state: state,
 	}
 }
 
@@ -37,19 +48,49 @@ func (l *luaStack) pop() luaValue {
 	return val
 }
 
+func (l *luaStack) pushN(vals []luaValue, n int) {
+	nVals := len(vals)
+	if n < 0 {
+		n = nVals
+	}
+
+	for i := 0; i < n; i++ {
+		if i < nVals {
+			l.push(vals[i])
+		} else {
+			l.push(nil)
+		}
+	}
+}
+
+func (l *luaStack) popN(n int) []luaValue {
+	vals := make([]luaValue, n)
+	for i := n - 1; i >= 0; i-- {
+		vals[i] = l.pop()
+	}
+	return vals
+}
+
 func (l *luaStack) absIndex(idx int) int {
-	if idx >= 0 {
+	if idx >= 0 || idx <= api.LUA_REGISTRYINDEX {
 		return idx
 	}
 	return idx + l.top + 1
 }
 
 func (l *luaStack) isValid(idx int) bool {
+	if idx == api.LUA_REGISTRYINDEX {
+		return true
+	}
 	absIdx := l.absIndex(idx)
 	return absIdx > 0 && absIdx <= l.top
 }
 
 func (l *luaStack) get(idx int) luaValue {
+	if idx == api.LUA_REGISTRYINDEX {
+		return l.state.registry
+	}
+
 	absIdx := l.absIndex(idx)
 	if absIdx > 0 && absIdx <= l.top {
 		return l.slots[absIdx-1]
@@ -58,6 +99,11 @@ func (l *luaStack) get(idx int) luaValue {
 }
 
 func (l *luaStack) set(idx int, val luaValue) {
+	if idx == api.LUA_REGISTRYINDEX {
+		l.state.registry = val.(*luaTable)
+		return
+	}
+
 	absIdx := l.absIndex(idx)
 	if absIdx > 0 && absIdx <= l.top {
 		l.slots[absIdx-1] = val

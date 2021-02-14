@@ -6,11 +6,10 @@ import (
 	"testing"
 
 	"github.com/iglev/glua/api"
-	"github.com/iglev/glua/binchunk"
 	"github.com/iglev/glua/state"
-	"github.com/iglev/glua/vm"
 )
 
+/*
 func printHeader(f *binchunk.ProtoType) {
 	funcType := "main"
 	if f.LineDefined > 0 {
@@ -236,4 +235,46 @@ func TestVM(t *testing.T) {
 	}
 	proto := binchunk.Undump(data)
 	luaMain(proto)
+}
+
+// TestLoad load
+func TestLoad(t *testing.T) {
+	data, err := ioutil.ReadFile("luac.out")
+	if err != nil {
+		panic(err)
+	}
+	ls := state.New()
+	ls.Load(data, "luac.out", "b")
+	ls.Call(0, 0)
+}
+*/
+
+func print(ls api.LuaState) int {
+	nArgs := ls.GetTop()
+	for i := 1; i <= nArgs; i++ {
+		if ls.IsBoolean(i) {
+			fmt.Printf("%t", ls.ToBoolean(i))
+		} else if ls.IsString(i) {
+			fmt.Print(ls.ToString(i))
+		} else {
+			fmt.Print(ls.TypeName(ls.Type(i)))
+		}
+		if i < nArgs {
+			fmt.Print("\t")
+		}
+	}
+	fmt.Println()
+	return 0
+}
+
+// TestRegister register
+func TestRegister(t *testing.T) {
+	data, err := ioutil.ReadFile("luac.out")
+	if err != nil {
+		panic(err)
+	}
+	ls := state.New()
+	ls.Register("print", print)
+	ls.Load(data, "luac.out", "b")
+	ls.Call(0, 0)
 }
