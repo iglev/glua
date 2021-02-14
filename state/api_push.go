@@ -33,7 +33,17 @@ func (l *luaState) PushString(s string) {
 
 // PushGoFunction - lua_pushcfunction
 func (l *luaState) PushGoFunction(f api.GoFunction) {
-	l.stack.push(newGoClosure(f))
+	l.stack.push(newGoClosure(f, 0))
+}
+
+// PushGoClosure - lua_pushcclosure
+func (l *luaState) PushGoClosure(f api.GoFunction, n int) {
+	closure := newGoClosure(f, n)
+	for i := n; i > 0; i-- {
+		val := l.stack.pop()
+		closure.upvals[i-1] = &upvalue{&val}
+	}
+	l.stack.push(closure)
 }
 
 // PushGlobalTable - lua_pushglobaltable
