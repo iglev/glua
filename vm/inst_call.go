@@ -90,6 +90,16 @@ func vararg(i Instruction, vm api.LuaVM) {
 	}
 }
 
+// R(A+3), ... ,R(A+2+C) := R(A)(R(A+1), R(A+2));
+func tForCall(i Instruction, vm api.LuaVM) {
+	a, _, c := i.ABC()
+	a += 1
+
+	_pushFuncAndArgs(a, 3, vm)
+	vm.Call(2, c)
+	_popResults(a+3, c+1, vm)
+}
+
 // return R(A)(R(A+1), ... ,R(A+B-1))
 func tailCall(i Instruction, vm api.LuaVM) {
 	a, b, _ := i.ABC()

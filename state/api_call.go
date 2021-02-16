@@ -15,13 +15,24 @@ func (l *luaState) Load(chunk []byte, chunkName, mode string) int {
 		env := l.registry.get(api.LUA_RIDX_GLOBALS)
 		c.upvals[0] = &upvalue{&env}
 	}
-	return 0
+	return api.LUA_OK
 }
 
 // Call - lua_call
 func (l *luaState) Call(nArgs, nResults int) {
 	val := l.stack.get(-(nArgs + 1))
-	if c, ok := val.(*closure); ok {
+	c, ok := val.(*closure)
+	if !ok {
+		if mf := getMetafield(val, "__call", l); mf != nil {
+			if c, ok = mf.(*closure); ok {
+				l.stack.push(val)
+				l.Insert(-(nArgs + 2))
+				nArgs += 1
+			}
+		}
+	}
+
+	if ok {
 		if c.proto != nil {
 			l.callLuaClosure(nArgs, nResults, c)
 		} else {
@@ -95,4 +106,27 @@ func (l *luaState) runLuaClosure() {
 			break
 		}
 	}
+}
+
+// PCall - lua_pcall
+func (l *luaState) PCall(nArgs, nResults, msgh int) (status int) {
+	caller := l.stack
+	status = api.LUA_ERRRUN
+
+	// catch error
+	defer func() {
+		if err := recover(); err != nil {
+			if msgh != 0 {
+				panic(err)
+			}
+			for l.stack != caller {
+				l.popLuaStack()
+			}
+			l.stack.push(err)
+		}
+	}()
+
+	l.Call(nArgs, nResults)
+	status = api.LUA_OK
+	return
 }

@@ -7,8 +7,12 @@ import (
 )
 
 type luaTable struct {
-	arr []luaValue
-	mp  map[luaValue]luaValue
+	metatable *luaTable
+	arr       []luaValue
+	mp        map[luaValue]luaValue
+	keys      map[luaValue]luaValue // used by next()
+	lastKey   luaValue              // used by next()
+	changed   bool                  // used by next()
 }
 
 func newLuaTable(nArr, nRec int) *luaTable {
@@ -20,6 +24,11 @@ func newLuaTable(nArr, nRec int) *luaTable {
 		t.mp = make(map[luaValue]luaValue, nRec)
 	}
 	return t
+}
+
+func (lt *luaTable) hasMetafield(fieldName string) bool {
+	return lt.metatable != nil &&
+		lt.metatable.get(fieldName) != nil
 }
 
 func (lt *luaTable) len() int {
@@ -71,6 +80,8 @@ func (lt *luaTable) put(key, val luaValue) {
 	if f, ok := key.(float64); ok && math.IsNaN(f) {
 		panic("table index is NaN")
 	}
+
+	lt.changed = true
 	key = _floatToInteger(key)
 	if idx, ok := key.(int64); ok && idx >= 1 {
 		arrLen := int64(len(lt.arr))
@@ -98,4 +109,36 @@ func (lt *luaTable) put(key, val luaValue) {
 	} else {
 		delete(lt.mp, key)
 	}
+}
+
+func (lt *luaTable) initKeys() {
+	lt.keys = make(map[luaValue]luaValue)
+	var key luaValue = nil
+	for i, v := range lt.arr {
+		if v != nil {
+			lt.keys[key] = int64(i + 1)
+			key = int64(i + 1)
+		}
+	}
+	for k, v := range lt.mp {
+		if v != nil {
+			lt.keys[key] = k
+			key = k
+		}
+	}
+	lt.lastKey = key
+}
+
+func (lt *luaTable) nextKey(key luaValue) luaValue {
+	if lt.keys == nil || (key == nil && lt.changed) {
+		lt.initKeys()
+		lt.changed = false
+	}
+
+	nextKey := lt.keys[key]
+	if nextKey == nil && key != nil && key != lt.lastKey {
+		panic("invalid key to 'next'")
+	}
+
+	return nextKey
 }

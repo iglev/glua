@@ -6,6 +6,8 @@ func (l *luaState) Len(idx int) {
 
 	if s, ok := val.(string); ok {
 		l.stack.push(int64(len(s)))
+	} else if result, ok := callMetamethod(val, val, "__len", l); ok {
+		l.stack.push(result)
 	} else if t, ok := val.(*luaTable); ok {
 		l.stack.push(int64(t.len()))
 	} else {
@@ -28,8 +30,36 @@ func (l *luaState) Concat(n int) {
 				continue
 			}
 
+			b := l.stack.pop()
+			a := l.stack.pop()
+			if result, ok := callMetamethod(a, b, "__concat", l); ok {
+				l.stack.push(result)
+				continue
+			}
+
 			panic("concatenation error!")
 		}
 	}
 	// n == 1, do nothing
+}
+
+// Next - lua_next
+func (l *luaState) Next(idx int) bool {
+	val := l.stack.get(idx)
+	if t, ok := val.(*luaTable); ok {
+		key := l.stack.pop()
+		if nextKey := t.nextKey(key); nextKey != nil {
+			l.stack.push(nextKey)
+			l.stack.push(t.get(nextKey))
+			return true
+		}
+		return false
+	}
+	panic("table expected!")
+}
+
+// Error - lua_error
+func (l *luaState) Error() int {
+	err := l.stack.pop()
+	panic(err)
 }

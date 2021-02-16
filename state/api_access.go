@@ -6,6 +6,19 @@ import (
 	"github.com/iglev/glua/api"
 )
 
+// lua_rawlen - RawLen
+func (L *luaState) RawLen(idx int) uint {
+	val := L.stack.get(idx)
+	switch x := val.(type) {
+	case string:
+		return uint(len(x))
+	case *luaTable:
+		return uint(x.len())
+	default:
+		return 0
+	}
+}
+
 // TypeName - lua_typename
 func (l *luaState) TypeName(tp api.LuaType) string {
 	switch tp {

@@ -99,7 +99,7 @@ func (l *luaStack) get(idx int) luaValue {
 		if c == nil || uvIdx >= len(c.upvals) {
 			return nil
 		}
-		return *(&c.upvals[uvIdx].val)
+		return *(c.upvals[uvIdx].val)
 	}
 
 	if idx == api.LUA_REGISTRYINDEX {

@@ -1,6 +1,8 @@
 package state
 
-import "github.com/iglev/glua/api"
+import (
+	"github.com/iglev/glua/api"
+)
 
 type luaState struct {
 	registry *luaTable
@@ -16,7 +18,6 @@ func New() *luaState {
 	// new state
 	ls := &luaState{registry: registry}
 	ls.pushLuaStack(newLuaStack(api.LUA_MINSTACK, ls))
-
 	return ls
 }
 

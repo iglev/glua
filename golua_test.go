@@ -267,6 +267,69 @@ func print(ls api.LuaState) int {
 	return 0
 }
 
+func getMetatable(ls api.LuaState) int {
+	if !ls.GetMetatable(1) {
+		ls.PushNil()
+	}
+	return 1
+}
+
+func setMetatable(ls api.LuaState) int {
+	ls.SetMetatable(1)
+	return 1
+}
+
+func next(ls api.LuaState) int {
+	ls.SetTop(2)
+	if ls.Next(1) {
+		return 2
+	} else {
+		ls.PushNil()
+		return 1
+	}
+}
+
+func pairs(ls api.LuaState) int {
+	ls.PushGoFunction(next)
+	ls.PushValue(1)
+	ls.PushNil()
+	return 3
+}
+
+func _iPairsAux(ls api.LuaState) int {
+	i := ls.ToInteger(2) + 1
+	ls.PushInteger(i)
+	if ls.GetI(1, i) == api.LUA_TNIL {
+		return 1
+	}
+	return 2
+}
+
+func ipairs(ls api.LuaState) int {
+	ls.PushGoFunction(_iPairsAux)
+	ls.PushValue(1)
+	ls.PushNil()
+	return 3
+}
+
+func errorFunc(ls api.LuaState) int {
+	return ls.Error()
+}
+
+func pCall(ls api.LuaState) int {
+	nArgs := ls.GetTop() - 1
+	status := ls.PCall(nArgs, -1, 0)
+	ls.PushBoolean(status == api.LUA_OK)
+	ls.Insert(1)
+	return ls.GetTop()
+}
+
+func typeFunc(ls api.LuaState) int {
+	name := ls.TypeName(ls.Type(-1))
+	ls.PushString(name)
+	return 1
+}
+
 // TestRegister register
 func TestRegister(t *testing.T) {
 	data, err := ioutil.ReadFile("luac.out")
@@ -275,6 +338,14 @@ func TestRegister(t *testing.T) {
 	}
 	ls := state.New()
 	ls.Register("print", print)
+	ls.Register("getmetatable", getMetatable)
+	ls.Register("setmetatable", setMetatable)
+	ls.Register("next", next)
+	ls.Register("pairs", pairs)
+	ls.Register("ipairs", ipairs)
+	ls.Register("error", errorFunc)
+	ls.Register("pcall", pCall)
+	ls.Register("type", typeFunc)
 	ls.Load(data, "luac.out", "b")
 	ls.Call(0, 0)
 }
