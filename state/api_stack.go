@@ -1,5 +1,7 @@
 package state
 
+import "github.com/iglev/glua/api"
+
 /*
 http://www.lua.org/manual/5.3/manual.html
 */
@@ -76,6 +78,7 @@ func (l *luaState) Rotate(idx, n int) {
 	l.stack.reverse(p, t)
 }
 
+// SetTop - lua_settop
 func (l *luaState) SetTop(idx int) {
 	newTop := l.stack.absIndex(idx)
 	if newTop < 0 {
@@ -91,4 +94,10 @@ func (l *luaState) SetTop(idx int) {
 			l.stack.push(nil)
 		}
 	}
+}
+
+// XMove - lua_xmove
+func (l *luaState) XMove(to api.LuaState, n int) {
+	vals := l.stack.popN(n)
+	to.(*luaState).stack.pushN(vals, n)
 }

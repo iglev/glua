@@ -17,8 +17,13 @@ func LuaUpvalueIndex(i int) int {
 	return LUA_REGISTRYINDEX - i
 }
 
-// LuaState lua state interface
 type LuaState interface {
+	BasicAPI
+	AuxLib
+}
+
+// BasicAPI lua basic api interface
+type BasicAPI interface {
 	/* basic stack manipulation */
 	GetTop() int
 	AbsIndex(idx int) int
@@ -31,6 +36,7 @@ type LuaState interface {
 	Remove(idx int)
 	Rotate(idx, n int)
 	SetTop(idx int)
+	XMove(to LuaState, n int)
 
 	/* access functions (stack -> Go) */
 	TypeName(tp LuaType) string
@@ -54,6 +60,8 @@ type LuaState interface {
 	ToString(idx int) string
 	ToStringX(idx int) (string, bool)
 	ToGoFunction(idx int) GoFunction
+	ToThread(idx int) LuaState
+	ToPointer(idx int) interface{}
 	RawLen(idx int) uint
 
 	/* push functions (Go -> stack) */
@@ -62,9 +70,11 @@ type LuaState interface {
 	PushInteger(n int64)
 	PushNumber(n float64)
 	PushString(s string)
+	PushFString(fmt string, a ...interface{})
 	PushGoFunction(f GoFunction)
 	PushGoClosure(f GoFunction, n int)
 	PushGlobalTable()
+	PushThread() bool
 
 	/* Comparison and arithmetic function */
 	Arith(op ArithOp)
@@ -102,4 +112,13 @@ type LuaState interface {
 	Concat(n int)
 	Next(idx int) bool
 	Error() int
+	StringToNumber(s string) bool
+
+	/* coroutine functions */
+	NewThread() LuaState
+	Resume(from LuaState, nArgs int) int
+	Yield(nResults int) int
+	Status() int
+	IsYieldable() bool
+	GetStack() bool // debug
 }

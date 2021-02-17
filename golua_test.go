@@ -1,12 +1,8 @@
 package glua
 
 import (
-	"fmt"
-	"io/ioutil"
 	"testing"
 
-	"github.com/iglev/glua/api"
-	"github.com/iglev/glua/compiler/lexer"
 	"github.com/iglev/glua/state"
 )
 
@@ -250,6 +246,7 @@ func TestLoad(t *testing.T) {
 }
 */
 
+/*
 func print(ls api.LuaState) int {
 	nArgs := ls.GetTop()
 	for i := 1; i <= nArgs; i++ {
@@ -374,14 +371,12 @@ func TestLexer(t *testing.T) {
 }
 
 func testParser(chunk, chunkName string) {
-	/*
-		ast := parser.Parse(chunk, chunkName)
-		b, err := json.Marshal(ast)
-		if err != nil {
-			panic(err)
-		}
-		println(string(b))
-	*/
+	ast := parser.Parse(chunk, chunkName)
+	b, err := json.Marshal(ast)
+	if err != nil {
+		panic(err)
+	}
+	println(string(b))
 }
 
 // TestParser parser
@@ -411,4 +406,13 @@ func TestRegister(t *testing.T) {
 	ls.Register("type", typeFunc)
 	ls.Load(data, "test.lua", "b")
 	ls.Call(0, 0)
+}
+*/
+
+// TestStdlib stdlib
+func TestStdlib(t *testing.T) {
+	ls := state.New()
+	ls.OpenLibs()
+	ls.LoadFile("test.lua")
+	ls.Call(0, -1)
 }

@@ -1,4 +1,3 @@
-
 local mt = {}
 
 function vector(x, y)
@@ -96,3 +95,47 @@ for i, v in ipairs(tb) do
         print(i, v)
     end
 end
+
+print(type(_G))
+print(os.time())
+print(package)
+for k, v in pairs(package) do
+    print(k, v)
+    if type(v) == 'table' then
+        for kk, vv in pairs(v) do
+            print('\t', kk, vv)
+        end
+    end
+end
+
+local function foo (a)
+    print("foo", a)
+    return coroutine.yield(2*a)
+end
+  
+local co = coroutine.create(function (a,b)
+    print("co-body", a, b)
+    local r = foo(a+1)
+    print("co-body", r)
+    local r, s = coroutine.yield(a+b, a-b)
+    print("co-body", r, s)
+    return b, "end"
+end)
+
+print("------------------")
+print("main", coroutine.resume(co, 1, 10))
+print("main", coroutine.resume(co, "r"))
+print("main", coroutine.resume(co, "x", "y"))
+print("main", coroutine.resume(co, "x", "y"))
+
+--[[
+co-body 1 10
+foo 2
+main true 4
+co-body r
+main true 11 -9
+co-body x y
+main true 10 end
+main false xxx
+]]
+

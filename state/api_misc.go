@@ -1,5 +1,7 @@
 package state
 
+import "github.com/iglev/glua/number"
+
 // Len - lua_len
 func (l *luaState) Len(idx int) {
 	val := l.stack.get(idx)
@@ -62,4 +64,17 @@ func (l *luaState) Next(idx int) bool {
 func (l *luaState) Error() int {
 	err := l.stack.pop()
 	panic(err)
+}
+
+// StringToNumber - lua_stringtonumber
+func (l *luaState) StringToNumber(s string) bool {
+	if n, ok := number.ParseInteger(s); ok {
+		l.PushInteger(n)
+		return true
+	}
+	if n, ok := number.ParseFloat(s); ok {
+		l.PushNumber(n)
+		return true
+	}
+	return false
 }

@@ -183,3 +183,20 @@ func (l *luaState) ToGoFunction(idx int) api.GoFunction {
 	}
 	return nil
 }
+
+// ToThread - lua_tothread
+func (l *luaState) ToThread(idx int) api.LuaState {
+	val := l.stack.get(idx)
+	if val != nil {
+		if ls, ok := val.(*luaState); ok {
+			return ls
+		}
+	}
+	return nil
+}
+
+// ToPointer - lua_topointer
+func (l *luaState) ToPointer(idx int) interface{} {
+	// todo
+	return l.stack.get(idx)
+}

@@ -1,6 +1,10 @@
 package state
 
-import "github.com/iglev/glua/api"
+import (
+	"fmt"
+
+	"github.com/iglev/glua/api"
+)
 
 /*
 http://www.lua.org/manual/5.3/manual.html
@@ -31,6 +35,12 @@ func (l *luaState) PushString(s string) {
 	l.stack.push(s)
 }
 
+// PushFString - lua_pushfstring
+func (l *luaState) PushFString(fmtStr string, a ...interface{}) {
+	str := fmt.Sprintf(fmtStr, a...)
+	l.stack.push(str)
+}
+
 // PushGoFunction - lua_pushcfunction
 func (l *luaState) PushGoFunction(f api.GoFunction) {
 	l.stack.push(newGoClosure(f, 0))
@@ -50,4 +60,10 @@ func (l *luaState) PushGoClosure(f api.GoFunction, n int) {
 func (l *luaState) PushGlobalTable() {
 	global := l.registry.get(api.LUA_RIDX_GLOBALS)
 	l.stack.push(global)
+}
+
+// PushThread - lua_pushthread
+func (l *luaState) PushThread() bool {
+	l.stack.push(l)
+	return l.isMainThread()
 }

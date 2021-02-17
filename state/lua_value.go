@@ -23,6 +23,8 @@ func typeOf(val luaValue) api.LuaType {
 		return api.LUA_TFUNCTION
 	case *luaTable:
 		return api.LUA_TTABLE
+	case *luaState:
+		return api.LUA_TTHREAD
 	default:
 		panic("todo!")
 	}
