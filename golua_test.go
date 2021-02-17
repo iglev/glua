@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/iglev/glua/api"
+	"github.com/iglev/glua/compiler/lexer"
 	"github.com/iglev/glua/state"
 )
 
@@ -330,9 +331,71 @@ func typeFunc(ls api.LuaState) int {
 	return 1
 }
 
+func testLexer(chunk, chunkName string) {
+	lex := lexer.NewLexer(chunk, chunkName)
+	for {
+		line, kind, token := lex.NextToken()
+		fmt.Printf("[%2d] [%-10s] %s\n",
+			line, kindToCategory(kind), token)
+		if kind == lexer.TOKEN_EOF {
+			break
+		}
+	}
+}
+
+func kindToCategory(kind int) string {
+	switch {
+	case kind < lexer.TOKEN_SEP_SEMI:
+		return "other"
+	case kind <= lexer.TOKEN_SEP_RCURLY:
+		return "separator"
+	case kind <= lexer.TOKEN_OP_NOT:
+		return "operator"
+	case kind <= lexer.TOKEN_KW_WHILE:
+		return "keyword"
+	case kind == lexer.TOKEN_IDENTIFIER:
+		return "identifier"
+	case kind == lexer.TOKEN_NUMBER:
+		return "number"
+	case kind == lexer.TOKEN_STRING:
+		return "string"
+	default:
+		return "other"
+	}
+}
+
+// TestLexer lexer
+func TestLexer(t *testing.T) {
+	data, err := ioutil.ReadFile("test.lua")
+	if err != nil {
+		panic(err)
+	}
+	testLexer(string(data), "test.lua")
+}
+
+func testParser(chunk, chunkName string) {
+	/*
+		ast := parser.Parse(chunk, chunkName)
+		b, err := json.Marshal(ast)
+		if err != nil {
+			panic(err)
+		}
+		println(string(b))
+	*/
+}
+
+// TestParser parser
+func TestParser(t *testing.T) {
+	data, err := ioutil.ReadFile("test.lua")
+	if err != nil {
+		panic(err)
+	}
+	testParser(string(data), "test.lua")
+}
+
 // TestRegister register
 func TestRegister(t *testing.T) {
-	data, err := ioutil.ReadFile("luac.out")
+	data, err := ioutil.ReadFile("test.lua")
 	if err != nil {
 		panic(err)
 	}
@@ -346,6 +409,6 @@ func TestRegister(t *testing.T) {
 	ls.Register("error", errorFunc)
 	ls.Register("pcall", pCall)
 	ls.Register("type", typeFunc)
-	ls.Load(data, "luac.out", "b")
+	ls.Load(data, "test.lua", "b")
 	ls.Call(0, 0)
 }

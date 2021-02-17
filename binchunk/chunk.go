@@ -86,6 +86,11 @@ type LocVar struct {
 	EndPC   uint32
 }
 
+func IsBinaryChunk(data []byte) bool {
+	return len(data) > 4 &&
+		string(data[:4]) == LuaSignature
+}
+
 // Undump ...
 func Undump(data []byte) *ProtoType {
 	reader := &Reader{data}

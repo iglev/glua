@@ -3,12 +3,19 @@ package state
 import (
 	"github.com/iglev/glua/api"
 	"github.com/iglev/glua/binchunk"
+	"github.com/iglev/glua/compiler"
 	"github.com/iglev/glua/vm"
 )
 
 // Load - lua_load
 func (l *luaState) Load(chunk []byte, chunkName, mode string) int {
-	proto := binchunk.Undump(chunk) // todo
+	var proto *binchunk.ProtoType
+	if binchunk.IsBinaryChunk(chunk) {
+		proto = binchunk.Undump(chunk)
+	} else {
+		proto = compiler.Compile(string(chunk), chunkName)
+	}
+
 	c := newLuaClosure(proto)
 	l.stack.push(c)
 	if len(proto.Upvalues) > 0 {

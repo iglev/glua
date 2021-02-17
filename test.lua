@@ -90,3 +90,9 @@ print(ok, result, type(result))
 ok, result = pcall(div2, {}, {})
 print(ok, result, type(result))
 
+tb = {1, 2, 3, 4, 5, 6, 7}
+for i, v in ipairs(tb) do
+    if v%2 == 0 then
+        print(i, v)
+    end
+end

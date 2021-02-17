@@ -69,9 +69,9 @@ func (l *luaState) RawGet(idx int) api.LuaType {
 }
 
 // RawGetI - lua_rawgeti
-func (self *luaState) RawGetI(idx int, i int64) api.LuaType {
-	t := self.stack.get(idx)
-	return self.getTable(t, i, true)
+func (l *luaState) RawGetI(idx int, i int64) api.LuaType {
+	t := l.stack.get(idx)
+	return l.getTable(t, i, true)
 }
 
 // GetGlobal - lua_getglobal
